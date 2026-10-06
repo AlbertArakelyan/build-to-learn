@@ -1,0 +1,14 @@
+{
+  "name": "build-to-learn",
+  "description": "Learn any stack by building a tiny app and documenting everything you hit along the way.",
+  "owner": {
+    "name": "Albert Arakelyan"
+  },
+  "plugins": [
+    {
+      "name": "build-to-learn",
+      "source": "./",
+      "description": "Build a tiny app end to end, then turn every problem into layered learning docs and a reusable template."
+    }
+  ]
+}

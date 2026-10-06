@@ -1,0 +1,27 @@
+{
+  "name": "build-to-learn",
+  "version": "0.1.0",
+  "description": "Learn a stack by building a tiny app end to end (build, run, ship), then turn every problem you hit into layered learning docs: a short README, a detailed DEV_DOCS.md and topic files. The repo becomes your reference and a template for future projects.",
+  "author": {
+    "name": "Albert Arakelyan"
+  },
+  "homepage": "https://github.com/AlbertArakelyan/build-to-learn",
+  "repository": "https://github.com/AlbertArakelyan/build-to-learn",
+  "license": "MIT",
+  "keywords": ["learning", "documentation", "template", "scaffold", "devdocs", "skill"],
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "build-to-learn",
+    "shortDescription": "Learn a stack by building a tiny app and documenting everything.",
+    "longDescription": "Scopes a tiny app that exercises the whole chain of a stack, sets up the toolchain the standard way, builds, runs and ships it, logs every problem as it happens, and distills it all into a short README, a detailed DEV_DOCS.md and topic files. The result is a learning reference and a template for future projects.",
+    "developerName": "Albert Arakelyan",
+    "category": "Productivity",
+    "capabilities": ["Read", "Write", "Execute"],
+    "websiteURL": "https://github.com/AlbertArakelyan/build-to-learn",
+    "defaultPrompt": [
+      "I want to learn Go with GTK 4 on Windows by building something small.",
+      "Turn this project into learning docs.",
+      "/build-to-learn status"
+    ]
+  }
+}

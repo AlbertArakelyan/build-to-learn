@@ -1,0 +1,12 @@
+{
+  "name": "build-to-learn",
+  "description": "Learn a stack by building a tiny app end to end (build, run, ship), then turn every problem you hit into layered learning docs: a short README, a detailed DEV_DOCS.md and topic files. The repo becomes your reference and a template for future projects.",
+  "version": "0.1.0",
+  "author": {
+    "name": "Albert Arakelyan"
+  },
+  "license": "MIT",
+  "homepage": "https://github.com/AlbertArakelyan/build-to-learn",
+  "repository": "https://github.com/AlbertArakelyan/build-to-learn",
+  "keywords": ["learning", "documentation", "template", "scaffold", "devdocs", "skill"]
+}
