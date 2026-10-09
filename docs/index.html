@@ -1,0 +1,277 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>build-to-learn</title>
+  <meta name="description" content="A Claude Code plugin and agent skill: learn any stack by building a tiny app end to end, then turn every problem you hit into a short README, detailed dev docs and a reusable template.">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%232563eb'/%3E%3Cpath d='M9 22l7-12 7 12z' fill='white'/%3E%3C/svg%3E">
+  <style>
+    :root {
+      --bg: #ffffff;
+      --bg-soft: #f5f7fb;
+      --text: #111827;
+      --muted: #5b6475;
+      --border: #e3e7ef;
+      --accent: #2563eb;
+      --accent-soft: #e8efff;
+      --code-bg: #0f172a;
+      --code-text: #e2e8f0;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #0b0f17;
+        --bg-soft: #121826;
+        --text: #e7ebf3;
+        --muted: #9aa4b8;
+        --border: #222b3c;
+        --accent: #6c9cff;
+        --accent-soft: #17223a;
+        --code-bg: #060a12;
+        --code-text: #dbe3f0;
+      }
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--text);
+      font: 16px/1.6 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    }
+    a { color: var(--accent); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    .wrap { max-width: 960px; margin: 0 auto; padding: 0 20px; }
+
+    header.top { border-bottom: 1px solid var(--border); }
+    header.top .wrap { display: flex; align-items: center; justify-content: space-between; height: 60px; }
+    .brand { font-weight: 700; color: var(--text); font-family: ui-monospace, Consolas, monospace; }
+    nav a { margin-left: 20px; color: var(--muted); font-size: 15px; }
+
+    .hero { padding: 72px 0 56px; text-align: center; }
+    .hero h1 { font-size: clamp(32px, 6vw, 52px); line-height: 1.1; margin: 0 0 18px; letter-spacing: -0.02em; }
+    .hero h1 span { color: var(--accent); }
+    .hero p.lead { font-size: 19px; color: var(--muted); max-width: 680px; margin: 0 auto 30px; }
+    .agents { margin-top: 18px; color: var(--muted); font-size: 14px; }
+    .btns { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+    .btn { display: inline-block; padding: 11px 20px; border-radius: 8px; font-weight: 600; border: 1px solid var(--border); color: var(--text); }
+    .btn.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+    .btn:hover { text-decoration: none; opacity: 0.9; }
+
+    section { padding: 56px 0; border-top: 1px solid var(--border); }
+    section.soft { background: var(--bg-soft); }
+    h2 { font-size: 28px; margin: 0 0 10px; letter-spacing: -0.01em; }
+    p.sub { color: var(--muted); margin: 0 0 30px; max-width: 680px; }
+
+    .steps { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; }
+    .card { background: var(--bg); border: 1px solid var(--border); border-radius: 12px; padding: 20px; }
+    section.soft .card { background: var(--bg); }
+    .card .num { display: inline-block; width: 28px; height: 28px; border-radius: 50%; background: var(--accent-soft); color: var(--accent); font-weight: 700; text-align: center; line-height: 28px; font-size: 14px; margin-bottom: 10px; }
+    .card h3 { margin: 0 0 6px; font-size: 17px; }
+    .card p { margin: 0; color: var(--muted); font-size: 15px; }
+
+    .code { position: relative; margin: 0 0 14px; }
+    pre {
+      background: var(--code-bg); color: var(--code-text);
+      padding: 16px 18px; border-radius: 10px; overflow-x: auto;
+      font: 14px/1.6 ui-monospace, Consolas, "Cascadia Code", monospace; margin: 0 0 14px;
+    }
+    .code pre { margin: 0; padding-right: 72px; }
+    .two pre { font-size: 13px; white-space: pre-wrap; word-break: break-all; }
+    code { font-family: ui-monospace, Consolas, monospace; font-size: 0.92em; }
+    p code, td code, li code { background: var(--bg-soft); border: 1px solid var(--border); padding: 1px 6px; border-radius: 5px; }
+    .copy {
+      position: absolute; top: 8px; right: 8px;
+      background: transparent; color: var(--code-text); border: 1px solid #334155; border-radius: 6px;
+      font-size: 12px; padding: 3px 8px; cursor: pointer; opacity: 0.75;
+    }
+    .copy:hover { opacity: 1; }
+
+    .two { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 24px; }
+    .two h3 { margin: 0 0 10px; font-size: 17px; }
+    .two p { color: var(--muted); font-size: 15px; margin: 0 0 12px; }
+
+    table { width: 100%; border-collapse: collapse; font-size: 15px; }
+    th, td { text-align: left; padding: 10px 12px; border-bottom: 1px solid var(--border); vertical-align: top; }
+    th { color: var(--muted); font-weight: 600; font-size: 13px; text-transform: uppercase; letter-spacing: 0.04em; }
+    td:first-child { white-space: nowrap; }
+    .table-wrap { overflow-x: auto; }
+
+    ul.rules { list-style: none; padding: 0; margin: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 12px 24px; }
+    ul.rules li { padding-left: 26px; position: relative; color: var(--muted); }
+    ul.rules li::before { content: "✓"; position: absolute; left: 0; color: var(--accent); font-weight: 700; }
+    ul.rules li b { color: var(--text); }
+
+    .example { display: flex; gap: 24px; align-items: center; flex-wrap: wrap; }
+    .example .card { flex: 1 1 320px; }
+
+    footer { padding: 32px 0; border-top: 1px solid var(--border); color: var(--muted); font-size: 14px; }
+    footer .wrap { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 10px; }
+
+    @media (max-width: 560px) {
+      nav a:not(.gh) { display: none; }
+      .hero { padding: 48px 0 40px; }
+      td:first-child { white-space: normal; }
+    }
+  </style>
+</head>
+<body>
+
+<header class="top">
+  <div class="wrap">
+    <a class="brand" href="#">/build-to-learn</a>
+    <nav>
+      <a href="#how">How it works</a>
+      <a href="#install">Install</a>
+      <a href="#usage">Usage</a>
+      <a class="gh" href="https://github.com/AlbertArakelyan/build-to-learn">GitHub</a>
+    </nav>
+  </div>
+</header>
+
+<main>
+  <div class="hero">
+    <div class="wrap">
+      <h1>Learn any stack by <span>building</span> something tiny.</h1>
+      <p class="lead">
+        Your AI agent builds a deliberately small app end to end (toolchain, build, run, ship),
+        logs every problem you hit along the way, and turns it all into docs you'll understand months later.
+      </p>
+      <div class="btns">
+        <a class="btn primary" href="#install">Install</a>
+        <a class="btn" href="https://github.com/AlbertArakelyan/build-to-learn">View on GitHub</a>
+      </div>
+      <p class="agents">Claude Code plugin · skill for Codex, opencode and other agents</p>
+    </div>
+  </div>
+
+  <section id="how" class="soft">
+    <div class="wrap">
+      <h2>How it works</h2>
+      <p class="sub">The app is small on purpose. The docs are the main deliverable: a repo you can reopen later, and a template for your next project in that stack.</p>
+      <div class="steps">
+        <div class="card"><div class="num">1</div><h3>Scope</h3><p>Pick the smallest app that touches the whole chain of the stack. In memory, one screen, a clear "done".</p></div>
+        <div class="card"><div class="num">2</div><h3>Toolchain</h3><p>Install from official sources, verify each tool, and log every snag the moment it happens.</p></div>
+        <div class="card"><div class="num">3</div><h3>Build, run, ship</h3><p>Scripts that hold the build logic, a verified run, and an artifact tested without the dev setup.</p></div>
+        <div class="card"><div class="num">4</div><h3>Docs</h3><p>A short README, a detailed DEV_DOCS.md, and focused topic files distilled from the learning log.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="wrap">
+      <h2>What you get</h2>
+      <p class="sub">Every project ends up with the same layered structure.</p>
+<pre>your-project/
+├── &lt;the tiny app&gt;          a working app, as small as possible
+├── build / run / package    scripts that hold the build logic
+├── LEARNING_LOG.md          every problem as it happened: symptom, cause, fix, lesson
+├── README.md                what it is, quick start, template note, roadmap
+├── DEV_DOCS.md              big picture, setup from scratch, scripts, troubleshooting
+└── &lt;TOPIC&gt;.md               focused notes: LINUX_BUILD.md, RUST_BUILD.md, …</pre>
+    </div>
+  </section>
+
+  <section id="install" class="soft">
+    <div class="wrap">
+      <h2>Install</h2>
+      <p class="sub">Globally for all your projects, or only for one project.</p>
+      <div class="two">
+        <div>
+          <h3>Claude Code, globally</h3>
+          <p>Default <code>user</code> scope: available in every project.</p>
+<pre>/plugin marketplace add AlbertArakelyan/build-to-learn
+/plugin install build-to-learn@build-to-learn</pre>
+          <h3>Claude Code, one project</h3>
+          <p>Recorded in <code>.claude/settings.json</code>, so everyone who clones the project gets it.</p>
+<pre>claude plugin marketplace add AlbertArakelyan/build-to-learn
+claude plugin install build-to-learn@build-to-learn --scope project</pre>
+        </div>
+        <div>
+          <h3>Codex, opencode and other agents</h3>
+          <p>With the <a href="https://skills.sh/">skills</a> installer. Installs into the current project by default.</p>
+<pre>npx skills add AlbertArakelyan/build-to-learn --skill build-to-learn</pre>
+          <p>Add <code>-g</code> to install globally:</p>
+<pre>npx skills add AlbertArakelyan/build-to-learn --skill build-to-learn -g</pre>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="usage">
+    <div class="wrap">
+      <h2>Usage</h2>
+      <p class="sub">Or just describe it: <em>"I want to learn Go with GTK 4 on Windows by building something small."</em></p>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Command</th><th>What it does</th></tr></thead>
+          <tbody>
+            <tr><td><code>/build-to-learn &lt;what to learn&gt;</code></td><td>Full workflow: scope a tiny app, set up the toolchain, build, run, ship, write the docs</td></tr>
+            <tr><td><code>/build-to-learn log &lt;note&gt;</code></td><td>Add an entry to <code>LEARNING_LOG.md</code></td></tr>
+            <tr><td><code>/build-to-learn docs</code></td><td>Create or refresh <code>README.md</code> and <code>DEV_DOCS.md</code></td></tr>
+            <tr><td><code>/build-to-learn topic &lt;subject&gt;</code></td><td>Add a focused topic file, e.g. <code>topic linux build</code></td></tr>
+            <tr><td><code>/build-to-learn status</code></td><td>Phases done, undocumented log entries, open roadmap items, next step</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <section class="soft">
+    <div class="wrap">
+      <h2>How the agent behaves</h2>
+      <p class="sub">The same rules in every mode.</p>
+      <ul class="rules">
+        <li><b>Logs as it goes.</b> Every problem and every question you ask becomes a log entry.</li>
+        <li><b>Explains the why</b> behind every tool, package, script line and setting.</li>
+        <li><b>Verifies before claiming</b>, and marks anything untested "not tested yet".</li>
+        <li><b>Asks before system changes</b> like editing PATH or uninstalling, and backs them up.</li>
+        <li><b>Leaves git to you.</b> No commits or pushes unless you ask.</li>
+        <li><b>Keeps the app tiny.</b> A documented problem teaches more than a new feature.</li>
+      </ul>
+    </div>
+  </section>
+
+  <section>
+    <div class="wrap">
+      <h2>Example</h2>
+      <p class="sub">The project this workflow came from.</p>
+      <div class="example">
+        <div class="card">
+          <h3><a href="https://github.com/AlbertArakelyan/gtk4-on-windows-with-go">gtk4-on-windows-with-go</a></h3>
+          <p>A GTK 4 todo app in Go on Windows: msys2 setup, build/run/package scripts, a self-contained DLL bundle,
+            a 12-section DEV_DOCS.md, an msys2 environments reference, and notes for Linux and Rust.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <span>MIT License · Albert Arakelyan</span>
+    <a href="https://github.com/AlbertArakelyan/build-to-learn">github.com/AlbertArakelyan/build-to-learn</a>
+  </div>
+</footer>
+
+<script>
+  document.querySelectorAll('pre').forEach(function (pre) {
+    if (!navigator.clipboard) return;
+    var btn = document.createElement('button');
+    btn.className = 'copy';
+    btn.type = 'button';
+    btn.textContent = 'Copy';
+    btn.addEventListener('click', function () {
+      navigator.clipboard.writeText(pre.textContent.trim()).then(function () {
+        btn.textContent = 'Copied';
+        setTimeout(function () { btn.textContent = 'Copy'; }, 1500);
+      });
+    });
+    var box = document.createElement('div');
+    box.className = 'code';
+    pre.parentNode.insertBefore(box, pre);
+    box.appendChild(pre);
+    box.appendChild(btn);
+  });
+</script>
+</body>
+</html>
